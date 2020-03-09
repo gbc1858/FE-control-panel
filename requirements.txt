@@ -1,0 +1,13 @@
+cycler==0.10.0
+gphoto2==2.2.1
+kiwisolver==1.1.0
+matplotlib==3.2.0
+mpldatacursor==0.7.1
+numpy==1.18.1
+pyparsing==2.4.6
+PyQt5==5.14.1
+PyQt5-sip==12.7.1
+pyqtgraph==0.10.0
+python-dateutil==2.8.1
+PyVISA==1.10.1
+six==1.14.0
