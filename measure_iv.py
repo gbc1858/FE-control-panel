@@ -139,7 +139,7 @@ class UIClass(QMainWindow, Ui_MainWindow):
                 self.v_setting = round(self.v_setting, 2)
 
                 self.update_table()
-                self.QApplication.processEvents()
+                # self.QApplication.processEvents()
 
                 self.voltage_list.append(self.v_setting)
                 self.current_list.append(self.i_reading)
@@ -155,7 +155,7 @@ class UIClass(QMainWindow, Ui_MainWindow):
         self.tableWidget_iv_results.insertRow(num_rows)
         self.tableWidget_iv_results.setItem(num_rows, 0, QTableWidgetItem(str(self.v_setting)))
         self.tableWidget_iv_results.setItem(num_rows, 1, QTableWidgetItem(str(self.i_reading)))
-        self.QtWidgets.qApp.processEvents()
+        # self.QtWidgets.qApp.processEvents()
 
     def save_iv_data(self):
         # TODO:
