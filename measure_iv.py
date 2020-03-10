@@ -1,23 +1,21 @@
 import shutil
-from PyQt5 import uic, QtWidgets
+from PyQt5 import uic
 from PyQt5.QtCore import QTimer
-
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTextBrowser, QVBoxLayout, \
-    QTableWidgetItem
+    QTableWidgetItem, qApp
 import pyqtgraph as pg
 import pyvisa
-
 import matplotlib.pyplot as plt
-
 import logging
 import os
 import subprocess
 import time
 import sys
+import gphoto2 as gp
+
 import settings
 from exceptions import *
 
-import gphoto2 as gp
 
 qtCreatorFile = "FE_control.ui"
 
@@ -26,7 +24,6 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
 
 class UIClass(QMainWindow, Ui_MainWindow):
-
     def __init__(self, parent=None, *args, **kwargs):
         QMainWindow.__init__(self, parent, *args, **kwargs)
         Ui_MainWindow.__init__(self, *args, **kwargs)
@@ -51,6 +48,11 @@ class UIClass(QMainWindow, Ui_MainWindow):
         self.iso = None
         self.aperture = None
         self.shutter_speed = None
+
+        # self.qTimer = QTimer()
+        # self.qTimer.setInterval(self.delay_aftr_v_changes)
+        # self.qTimer.timeout.connect(self.update_table)
+        # self.qTimer.start()
 
         self.pushButton_scan.clicked.connect(self.measure_iv)
         self.pushButton_abort.clicked.connect(self.disconnect_dc_power)
@@ -80,15 +82,15 @@ class UIClass(QMainWindow, Ui_MainWindow):
         self.power_supply.write(":OUTP OFF")
 
     def select_file(self):
-        self.lineEdit_folder.setText(QFileDialog.getExistingDirectory(
-            directory='/Users/chen/Desktop/github/fe_control_panel'))
+        self.lineEdit_folder.setText(QFileDialog.getExistingDirectory(directory='/Users/chen/Desktop/github'
+                                                                                '/fe_control_panel'))
 
     def save_iv(self):
         filename = os.path.join(self.lineEdit_folder.text(),
                                 self.lineEdit_filename.text())
         self.data_iv.to_csv(filename + '.csv')
         shutil.copy('measurement_iv.png', filename + '_iv.png')
-        self.textBrowser.append('I-V data saved')
+        self.textBrowser.append('I-V data saved.')
 
     def measure_iv(self):
         # Get input parameters.
@@ -129,6 +131,7 @@ class UIClass(QMainWindow, Ui_MainWindow):
                     self.v_setting = self.v_min + self.v_step * i
                 if ramp_down:
                     self.v_setting = self.v_max - self.v_step * i
+
                 self.power_supply.write(f":SOUR:VOLT {self.v_setting}")
                 self.power_supply.write(":READ?")
 
@@ -136,22 +139,23 @@ class UIClass(QMainWindow, Ui_MainWindow):
                 self.v_setting = round(self.v_setting, 2)
 
                 self.update_table()
+                self.QApplication.processEvents()
 
                 self.voltage_list.append(self.v_setting)
                 self.current_list.append(self.i_reading)
 
                 # self.image_cap()
                 # self.plot_iv_scan()
-                # time.sleep(self.delay_aftr_v_changes / 1000)
+                time.sleep(self.delay_aftr_v_changes / 1000)
         else:
             self.textBrowser.append("***STEP SIZE ERROR. Please re-enter.***")
-
 
     def update_table(self):
         num_rows = self.tableWidget_iv_results.rowCount()
         self.tableWidget_iv_results.insertRow(num_rows)
         self.tableWidget_iv_results.setItem(num_rows, 0, QTableWidgetItem(str(self.v_setting)))
         self.tableWidget_iv_results.setItem(num_rows, 1, QTableWidgetItem(str(self.i_reading)))
+        self.QtWidgets.qApp.processEvents()
 
     def save_iv_data(self):
         # TODO:
@@ -180,7 +184,7 @@ class UIClass(QMainWindow, Ui_MainWindow):
         camera.init()
         print('Capturing image')
         file_path = camera.capture(gp.GP_CAPTURE_IMAGE)
-        file_location = os.path.join('/Users/chen/Desktop/github/fe_control_pane/test_img', current_time + ".jpg")
+        file_location = os.path.join(settings.IMG_ADDRESS, current_time + ".jpg")
         camera_file = camera.file_get(
             file_path.folder, file_path.name, gp.GP_FILE_TYPE_NORMAL)
         camera_file.save(file_location)
